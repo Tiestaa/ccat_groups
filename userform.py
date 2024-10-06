@@ -85,6 +85,13 @@ class UserDeleteGroupForm(CatForm):
 
     ask_confirm = True
 
+    def next(self):
+        user_permission = getUserPermission(self.cat.user_id)
+        if ("USERS" not in user_permission) or ("READ" not in user_permission['USERS']):
+            return {"output": "Permissions not valid"}
+        else:
+            return super().next()
+
     def submit(self, form_data):
         db = sqldb()
         user_id = form_data["user_id"]
