@@ -1,21 +1,37 @@
-from pydantic import BaseModel
-from cat.experimental.form import form, CatForm
-from .db import sqldb
+from pydantic import BaseModel,ValidationError,ValidationInfo,field_validator
+from typing import List
 
-"""
-    TODO
-    1. aggiungere validator che prenda user che esistano
-    2. personalizzare il messaggio che mostra utenti e id disponibili da poter aggiugnere
-    3. solo groups che esistono (collegato a 1)
-"""
+from cat.experimental.form import form, CatForm, CatFormState
+from cat.db import crud
+from cat.log import log
+
+from .db import sqldb
 
 class UserInfo(BaseModel):
     user_id: str
     group_name: str
 
+    @field_validator('user_id')
+    @classmethod
+    def userExists(cls, value: str)-> str:
+        users = list(map(lambda x: x[1]['username'],crud.get_users().items()))
+        if value not in users:
+            raise ValueError(f"user '{value}' does't exists")
+        else:
+            return value
+        
+    @field_validator('group_name')
+    @classmethod
+    def userExists(cls, value: str)-> str:
+        groups = sqldb().getGroups()
+        if value not in groups:
+            raise ValueError(f"user '{value}' does't exists")
+        else:
+            return value
+
 @form
 class UserInsertGroupForm(CatForm):
-    description = "Add user in group "
+    description = "Add user in group"
     model_class = UserInfo
     start_examples = [
         "insert user in group",
@@ -35,10 +51,10 @@ class UserInsertGroupForm(CatForm):
         user_id = form_data["user_id"]
         group_name = form_data["group_name"]
 
-        db.insert_user_in_group(group_name, user_id)
+        ret = db.insert_user_in_group(group_name, user_id, self.cat.user_id)
 
         return {
-            "output": f"Inserted user {user_id} in group {group_name}"
+            "output": ret
         }
 
 @form
@@ -62,10 +78,10 @@ class UserDeleteGroupForm(CatForm):
         user_id = form_data["user_id"]
         group_name = form_data["group_name"]
 
-        db.delete_user_in_group(group_name, user_id)
+        ret = db.delete_user_in_group(group_name, user_id, self.cat.user_id)
         
         return {
-            "output": f"Deleted user {user_id} from group {group_name}"
+            "output": ret
         }
 
 

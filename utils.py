@@ -4,9 +4,9 @@ Help page for declarative memory profiling. Commands available:
 [@p profile_name]   - change to profile_name
 [@c profile_name]   - create profile_name
 [@r profile_name]   - remove profile_name
+[@p]                - print current profile_name  
 [@l]                - get list of profile for user
 [@d]                - deactivate profiling. No active profile
-[@p]                - print current profile_name              
 [@h]                - help 
 """
 
