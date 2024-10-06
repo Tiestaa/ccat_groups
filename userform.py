@@ -1,11 +1,16 @@
 from pydantic import BaseModel,ValidationError,ValidationInfo,field_validator
-from typing import List
+from typing import List, Dict
 
 from cat.experimental.form import form, CatForm, CatFormState
 from cat.db import crud
 from cat.log import log
 
 from .db import sqldb
+
+def getUserPermission(username: str) -> Dict:
+   for key, value in crud.get_users().items():
+       if value['username'] == username:
+           return value['permissions']
 
 class UserInfo(BaseModel):
     user_id: str
@@ -25,7 +30,7 @@ class UserInfo(BaseModel):
     def userExists(cls, value: str)-> str:
         groups = sqldb().getGroups()
         if value not in groups:
-            raise ValueError(f"user '{value}' does't exists")
+            raise ValueError(f"group '{value}' does't exists")
         else:
             return value
 
@@ -45,6 +50,13 @@ class UserInsertGroupForm(CatForm):
     ]
 
     ask_confirm = True
+
+    def next(self):
+        user_permission = getUserPermission(self.cat.user_id)
+        if ("USERS" not in user_permission) or ("READ" not in user_permission['USERS']):
+            return {"output": "Permissions not valid"}
+        else:
+            return super().next()
 
     def submit(self, form_data):
         db = sqldb()
