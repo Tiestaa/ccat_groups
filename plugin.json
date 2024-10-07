@@ -1,10 +1,10 @@
 {
     "name": "Ccat Groups",
-    "version": "0.0.1",
-    "description": "Description of ccat_groups.",
-    "author_name": "Me",
-    "author_url": "https://mywebsite.me",
-    "plugin_url": "https://github.com/my_name/ccat_groups",
-    "tags": "cat, template, example",
-    "thumb": "https://raw.githubusercontent.com/my_repo_path/ccat_groups.png"
+    "version": "0.0.2",
+    "description": "Create and handle groups using this plugin. CCat Groups enables the segmentation of declarative memory based on group names. The group admin can add users and upload documents to Rabbit Hole. Every group member will retrieve these documents to augment the prompt.",
+    "author_name": "Francesco Testa",
+    "author_url": "https://github.com/Tiestaa",
+    "plugin_url": "https://github.com/Tiestaa/ccat_groups",
+    "tags": "cat, groups, memory_profiling",
+    "thumb": "https://raw.githubusercontent.com/Tiestaa/ccat_groups/main/ccat_groups.png"
 }

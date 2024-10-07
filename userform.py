@@ -29,6 +29,7 @@ class UserInfo(BaseModel):
     @classmethod
     def userExists(cls, value: str)-> str:
         groups = sqldb().getGroups()
+        log.info(groups)
         if value not in groups:
             raise ValueError(f"group '{value}' does't exists")
         else:

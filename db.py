@@ -73,7 +73,7 @@ class sqldb:
         cursor = self.conn.cursor()
 
         try:
-            res = cursor.execute("SELECT a.name, a.ownowner_cat_id, b.user_id FROM GROUPS as a INNER JOIN USER_IN_GROUP as b on a.name = b.group_name WHERE a.name = ?", [group_name]).fetchone()
+            res = cursor.execute("SELECT a.name, a.owner_cat_id, b.user_id FROM GROUPS as a INNER JOIN USER_IN_GROUP as b on a.name = b.group_name WHERE a.name = ?", [group_name]).fetchone()
             log.warning(res)
             if res is None:
                 raise HTTPexception(f"The group name {group_name} or user {user_id} doesn't exist!", 404)
@@ -126,12 +126,26 @@ class sqldb:
         cursor = self.conn.cursor()
 
         try:
-            res = cursor.execute("SELECT a.name FROM GROUPS WHERE 1")
+            res = cursor.execute("SELECT a.name FROM GROUPS as a WHERE 1")
             return list(map(lambda x: x[0],res.fetchall()))
         
         except Exception as ex:
             log.error(f"Error fetching groups --> {ex}")
             return []
+        
+    def isGroupOwner(self, group_name: str, user_id: str) -> bool:
+        if not self.is_connected():
+            self.conn = sqlite3.connect(DB_PATH)
+        cursor = self.conn.cursor()
+        try:
+            res = cursor.execute("SELECT a.owner_cat_id FROM GROUPS as a WHERE a.name = ?", [group_name]).fetchone()
+            if res is None or res[0] != user_id:
+                return False
+            return True
+        except Exception as ex:
+            log.error(ex)
+            return False
+
         
     def clearRemovedUsers(self, users_list: List[str]) -> None:
         if not self.is_connected():

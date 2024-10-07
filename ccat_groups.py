@@ -16,10 +16,10 @@ def after_cat_bootstrap(cat):
 @hook
 def before_rabbithole_insert_memory(doc, cat):
     # insert metadata about user and group
-    if cat.working_memory[WORKING_MEMORY_KEY] != None:
+    if WORKING_MEMORY_KEY in cat.working_memory and cat.working_memory[WORKING_MEMORY_KEY] != None:
         doc.metadata['profile'] = cat.working_memory[WORKING_MEMORY_KEY]
-
-    doc.metadata["user_id"] = cat.user_id
+    else :
+        doc.metadata["user_id"] = cat.user_id
     return doc
 
 @hook
@@ -32,6 +32,13 @@ def before_cat_recalls_declarative_memories(declarative_recall_config, cat):
 
     return declarative_recall_config
 
+@hook(priority = 5)
+def before_rabbithole_splits_text(docs, cat):
+    if (WORKING_MEMORY_KEY in cat.working_memory and cat.working_memory[WORKING_MEMORY_KEY] != None) and not sqldb().isGroupOwner(cat.working_memory[WORKING_MEMORY_KEY], cat.user_id):
+        cat.send_ws_message("You doesn't have the permissions to upload document in this group.", msg_type='chat')
+        return []
+    return docs
+        
 
 @hook()
 def agent_fast_reply(fast_reply, cat):
